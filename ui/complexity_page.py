@@ -145,6 +145,7 @@ class ComplexityPage(QWidget):
         viz_splitter.addWidget(table_card)
         viz_splitter.setStretchFactor(0, 3)
         viz_splitter.setStretchFactor(1, 2)
+        viz_splitter.setSizes([650, 350])
         layout.addWidget(viz_splitter)
 
         # 3. Comprehensive Asymptotic Guide Cards

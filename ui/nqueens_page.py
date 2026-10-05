@@ -70,6 +70,7 @@ class NQueensPage(QWidget):
 
         main_splitter.setStretchFactor(0, 3)
         main_splitter.setStretchFactor(1, 2)
+        main_splitter.setSizes([680, 340])
         root_layout.addWidget(main_splitter, 1)
 
     def _create_config_card(self) -> QFrame:
@@ -218,10 +219,12 @@ class NQueensPage(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea { background: transparent; }")
+        scroll.setMinimumWidth(320)
 
         container = QWidget()
+        container.setMinimumWidth(300)
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 8, 0)
         layout.setSpacing(12)
 
         # 1. Backtracking Counters
@@ -366,6 +369,7 @@ class NQueensPage(QWidget):
         l.setSpacing(2)
 
         t_lbl = QLabel(title)
+        t_lbl.setWordWrap(True)
         t_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {Colors.TEXT_MUTED}; text-transform: uppercase;")
         l.addWidget(t_lbl)
 
