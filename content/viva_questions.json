@@ -1,0 +1,62 @@
+[
+  {
+    "id": "viva_1",
+    "category": "Sorting",
+    "question": "What is the difference between an in-place sort and an out-of-place sort?",
+    "answer": "An in-place sorting algorithm requires only O(1) auxiliary memory beyond the original input array (e.g. Bubble Sort, Selection Sort, Insertion Sort, Heap Sort). An out-of-place algorithm requires O(n) or non-constant auxiliary memory (e.g. standard array Merge Sort requires an O(n) merge buffer)."
+  },
+  {
+    "id": "viva_2",
+    "category": "Sorting",
+    "question": "Why is Quick Sort often preferred over Merge Sort despite having an O(n²) worst-case time complexity?",
+    "answer": "Quick Sort has smaller constant factors and excellent CPU cache locality because it operates in-place via sequential memory scans. With good pivot selection (e.g., randomized or median-of-three), the probability of the O(n²) worst case is negligible. Additionally, it requires only O(log n) stack space compared to Merge Sort's O(n) auxiliary array."
+  },
+  {
+    "id": "viva_3",
+    "category": "Sorting",
+    "question": "What does algorithm stability mean, and which of the 6 implemented sorting algorithms are stable?",
+    "answer": "A sorting algorithm is stable if elements with equal comparison keys appear in the sorted output in the exact same relative order as they were in the input. Among the 6 algorithms: Bubble Sort, Insertion Sort, and Merge Sort are stable. Selection Sort, Quick Sort, and Heap Sort are unstable."
+  },
+  {
+    "id": "viva_4",
+    "category": "Sorting",
+    "question": "How does building a binary max-heap take O(n) time rather than O(n log n)?",
+    "answer": "Building a heap bottom-up with sift-down processes nodes from bottom to top. Most nodes reside near the leaves: n/2 nodes are at height 0 (cost 0), n/4 at height 1 (cost 1), n/8 at height 2 (cost 2). The sum of (h / 2^h) for h=1 to inf converges to 2. Hence, the total operations bound mathematically to O(n)."
+  },
+  {
+    "id": "viva_5",
+    "category": "Pathfinding",
+    "question": "Why does Dijkstra's algorithm fail when a graph contains negative edge weights?",
+    "answer": "Dijkstra relies on the greedy choice property: once a node is extracted from the priority queue and marked visited, its shortest distance is assumed finalized and never revisited. If a negative edge appears later, a shorter path could exist through that negative edge, violating this invariant. Graphs with negative edges require the Bellman-Ford algorithm."
+  },
+  {
+    "id": "viva_6",
+    "category": "Pathfinding",
+    "question": "What does it mean for a heuristic h(n) in A* to be 'admissible', and what happens if h(n) is not admissible?",
+    "answer": "A heuristic h(n) is admissible if it never overestimates the true minimum cost from node n to the goal: h(n) <= h*(n). If h(n) is admissible and non-negative, A* is mathematically guaranteed to find an optimal shortest path. If h(n) overestimates, A* may find a suboptimal path early and terminate without exploring the true optimal route."
+  },
+  {
+    "id": "viva_7",
+    "category": "Pathfinding",
+    "question": "Does Depth-First Search (DFS) guarantee finding the shortest path on an unweighted grid?",
+    "answer": "No. DFS explores deeply along one candidate branch until hitting a wall before backtracking. It may discover a long, winding, or circuitous path to the target without checking shorter paths on adjacent branches. Only BFS guarantees the shortest path in unweighted graphs."
+  },
+  {
+    "id": "viva_8",
+    "category": "Backtracking",
+    "question": "How does Backtracking differ from pure Brute Force in the N-Queens problem?",
+    "answer": "Brute Force generates all N^N possible queen configurations before checking validity. Backtracking constructs candidate solutions incrementally row by row and performs bounding/feasibility checks at every step. If a queen placement conflicts with an existing queen, the entire subtree of (N - row) remaining placements is pruned immediately, reducing the search space from N^N to a small fraction of N!."
+  },
+  {
+    "id": "viva_9",
+    "category": "Complexity",
+    "question": "What is the difference between Big-O, Big-Omega, and Big-Theta notations?",
+    "answer": "Big-O provides an asymptotic upper bound (f(n) <= c*g(n)), representing the worst-case growth rate. Big-Omega (Ω) provides an asymptotic lower bound (f(n) >= c*g(n)), representing the best-case growth rate. Big-Theta (Θ) provides an asymptotically tight bound where f(n) is bounded both above and below by g(n)."
+  },
+  {
+    "id": "viva_10",
+    "category": "Complexity",
+    "question": "Why is comparison-based sorting bounded below by Ω(n log n) in the worst case?",
+    "answer": "Any comparison sort can be modeled as a binary decision tree where each comparison branches left or right. For an array of n elements, there are n! possible permutations. A binary tree with n! leaves must have a minimum height of log2(n!). By Stirling's approximation, log2(n!) = Θ(n log n). Thus, any comparison algorithm must make at least Ω(n log n) comparisons in the worst case."
+  }
+]

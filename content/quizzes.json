@@ -1,0 +1,71 @@
+[
+  {
+    "id": "q1",
+    "category": "Sorting",
+    "question": "What is the worst-case auxiliary space complexity of standard array Merge Sort?",
+    "options": ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    "correct_index": 2,
+    "explanation": "Standard Merge Sort requires an auxiliary buffer of size O(n) to merge sub-arrays together. Unlike Quick Sort or Heap Sort, it is not an in-place algorithm."
+  },
+  {
+    "id": "q2",
+    "category": "Sorting",
+    "question": "Which sorting algorithm performs at most O(n) swaps in the worst case?",
+    "options": ["Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort"],
+    "correct_index": 1,
+    "explanation": "Selection Sort performs exactly one swap per outer loop iteration (at most n-1 swaps total). This makes it valuable when memory writes are exceptionally expensive."
+  },
+  {
+    "id": "q3",
+    "category": "Sorting",
+    "question": "What is the worst-case time complexity of Quick Sort with the Lomuto partition scheme?",
+    "options": ["O(n log n)", "O(n)", "O(n²)", "O(2ⁿ)"],
+    "correct_index": 2,
+    "explanation": "When the chosen pivot is consistently the smallest or largest element (e.g. on already sorted arrays without randomization), the partitions are completely unbalanced (size 0 and n-1), leading to O(n²) time."
+  },
+  {
+    "id": "q4",
+    "category": "Pathfinding",
+    "question": "Which algorithm is mathematically guaranteed to find the shortest path in an UNWEIGHTED grid?",
+    "options": ["DFS", "BFS", "Dijkstra only", "Greedy Best-First Search"],
+    "correct_index": 1,
+    "explanation": "Breadth-First Search (BFS) explores all vertices level-by-level in increasing order of hop distance from the start node, guaranteeing the shortest path in unweighted graphs."
+  },
+  {
+    "id": "q5",
+    "category": "Pathfinding",
+    "question": "In A* search, what condition must the heuristic h(n) satisfy to guarantee finding an optimal shortest path?",
+    "options": [
+      "h(n) must equal 0 everywhere",
+      "h(n) must be admissible (never overestimate true distance)",
+      "h(n) must be strictly greater than actual distance",
+      "h(n) must be negative"
+    ],
+    "correct_index": 1,
+    "explanation": "Admissibility means h(n) <= h*(n) for all nodes n. An admissible heuristic guarantees that A* never prunes or bypasses the true shortest path."
+  },
+  {
+    "id": "q6",
+    "category": "Backtracking",
+    "question": "How many total valid solutions exist for the 8-Queens problem on an 8×8 board?",
+    "options": ["8", "12", "92", "256"],
+    "correct_index": 2,
+    "explanation": "There are exactly 92 distinct solutions to the 8-Queens problem. If symmetries (rotations and reflections) are grouped, there are 12 fundamental distinct solutions."
+  },
+  {
+    "id": "q7",
+    "category": "Complexity",
+    "question": "If an algorithm's running time is described by T(n) = 2T(n/2) + O(n), what is its asymptotic complexity by the Master Theorem?",
+    "options": ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
+    "correct_index": 1,
+    "explanation": "By the Master Theorem (Case 2), with a=2, b=2, and f(n)=O(n^1), log_b(a) = log_2(2) = 1. Since f(n) matches n^(log_b(a)), T(n) = Θ(n log n). This is the recurrence for Merge Sort."
+  },
+  {
+    "id": "q8",
+    "category": "Complexity",
+    "question": "Which of the following growth rates is the slowest as n approaches infinity?",
+    "options": ["O(n)", "O(log n)", "O(n log n)", "O(√n)"],
+    "correct_index": 1,
+    "explanation": "Logarithmic growth O(log n) is strictly slower than O(√n), O(n), and O(n log n). For example, at n=1,000,000, log2(n) ≈ 20, whereas √n = 1000."
+  }
+]
