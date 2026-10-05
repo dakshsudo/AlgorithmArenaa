@@ -12,7 +12,7 @@ class ChessboardCanvas(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("ChessboardCanvas")
-        self.setMinimumSize(360, 360)
+        self.setMinimumSize(220, 220)
 
         self.n: int = 8
         self.queens: List[int] = [-1] * 8

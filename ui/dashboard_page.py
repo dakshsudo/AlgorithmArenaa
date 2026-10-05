@@ -173,15 +173,16 @@ class DashboardPage(QWidget):
         
         # Quick-Start Guidelines Card
         guide_card = QFrame()
+        guide_card.setObjectName("DashboardGuideCard")
         guide_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#DashboardGuideCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 12px;
-                padding: 18px;
             }}
         """)
         guide_layout = QVBoxLayout(guide_card)
+        guide_layout.setContentsMargins(18, 18, 18, 18)
         guide_layout.setSpacing(8)
         
         g_title = QLabel("💡 Quick-Start & DAA Viva Tips")

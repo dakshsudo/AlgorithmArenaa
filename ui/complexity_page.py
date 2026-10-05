@@ -43,18 +43,22 @@ class ComplexityPage(QWidget):
 
         # 1. Interactive Slider Card
         slider_card = QFrame()
+        slider_card.setObjectName("CompSliderCard")
         slider_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompSliderCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px 16px;
             }}
         """)
         s_layout = QHBoxLayout(slider_card)
+        s_layout.setContentsMargins(14, 12, 14, 12)
         s_layout.setSpacing(14)
 
-        s_layout.addWidget(QLabel("Input Size (N):"))
+        slider_lbl = QLabel("Input Size (N):")
+        slider_lbl.setStyleSheet(f"background: transparent; border: none; font-weight: 600;")
+        s_layout.addWidget(slider_lbl)
+
         self.n_slider = QSlider(Qt.Orientation.Horizontal)
         self.n_slider.setRange(1, 50)
         self.n_slider.setValue(20)
@@ -63,13 +67,13 @@ class ComplexityPage(QWidget):
         s_layout.addWidget(self.n_slider)
 
         self.n_label = QLabel("N = 20")
-        self.n_label.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.PRIMARY_LIGHT}; min-width: 60px;")
+        self.n_label.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.PRIMARY_LIGHT}; min-width: 60px; background: transparent; border: none;")
         s_layout.addWidget(self.n_label)
 
         s_layout.addStretch()
 
         help_lbl = QLabel("Drag slider to inspect asymptotic growth scaling across growth classes.")
-        help_lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_MUTED};")
+        help_lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_MUTED}; background: transparent; border: none;")
         s_layout.addWidget(help_lbl)
 
         layout.addWidget(slider_card)
@@ -80,19 +84,20 @@ class ComplexityPage(QWidget):
 
         # Left: Curves Chart Card
         chart_card = QFrame()
+        chart_card.setObjectName("CompCurvesCard")
         chart_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompCurvesCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         c_layout = QVBoxLayout(chart_card)
+        c_layout.setContentsMargins(12, 12, 12, 12)
         c_layout.setSpacing(8)
 
         c_header = QLabel("Asymptotic Growth Trajectory (N = 1 to 50)")
-        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         c_layout.addWidget(c_header)
 
         self.chart = ComplexityCurvesChartView()
@@ -104,11 +109,11 @@ class ComplexityPage(QWidget):
         for cls_info in COMPLEXITY_CLASSES:
             box = QHBoxLayout()
             box.setSpacing(4)
-            badge = QFrame()
+            badge = QWidget()
             badge.setFixedSize(10, 10)
             badge.setStyleSheet(f"background-color: {cls_info.color_hex}; border-radius: 2px;")
             lbl = QLabel(cls_info.notation)
-            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED};")
+            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED}; background: transparent; border: none; padding: 0px;")
             box.addWidget(badge)
             box.addWidget(lbl)
             leg_row.addLayout(box)
@@ -119,19 +124,20 @@ class ComplexityPage(QWidget):
 
         # Right: Real-time Growth Values Table Card
         table_card = QFrame()
+        table_card.setObjectName("CompValuesCard")
         table_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompValuesCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         t_layout = QVBoxLayout(table_card)
+        t_layout.setContentsMargins(12, 12, 12, 12)
         t_layout.setSpacing(8)
 
         t_header = QLabel("Operation Counts at Current N")
-        t_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        t_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         t_layout.addWidget(t_header)
 
         self.values_table = QTableWidget()
@@ -150,19 +156,20 @@ class ComplexityPage(QWidget):
 
         # 3. Comprehensive Asymptotic Guide Cards
         guide_card = QFrame()
+        guide_card.setObjectName("CompGuideCard")
         guide_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompGuideCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 16px;
             }}
         """)
         g_layout = QVBoxLayout(guide_card)
+        g_layout.setContentsMargins(16, 16, 16, 16)
         g_layout.setSpacing(12)
 
         g_title = QLabel("📚 Asymptotic Foundations for DAA Examinations & Viva")
-        g_title.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.PRIMARY_LIGHT};")
+        g_title.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.PRIMARY_LIGHT}; background: transparent; border: none;")
         g_layout.addWidget(g_title)
 
         content_html = """

@@ -1,7 +1,7 @@
 """Sorting Lab page: interactive visualization, controls, statistics, and pseudocode."""
 from typing import List, Optional
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QComboBox, QSlider, QLineEdit, QFrame, QScrollArea, QSplitter
 )
 from PySide6.QtCore import Qt
@@ -76,44 +76,65 @@ class SortingPage(QWidget):
 
         main_splitter.setStretchFactor(0, 3)
         main_splitter.setStretchFactor(1, 2)
-        main_splitter.setSizes([680, 340])
+        main_splitter.setSizes([640, 320])
         root_layout.addWidget(main_splitter, 1)
 
     def _create_config_card(self) -> QFrame:
         card = QFrame()
-        card.setProperty("class", "card")
+        card.setObjectName("SortingConfigCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingConfigCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(10)
 
-        # Row 1: Algorithm selector + Array presets
+        # Row 1: Algorithm selector + Array Size
         row1 = QHBoxLayout()
         row1.setSpacing(10)
 
         algo_lbl = QLabel("Algorithm:")
-        algo_lbl.setStyleSheet(f"font-weight: 600; color: {Colors.TEXT_PRIMARY};")
+        algo_lbl.setStyleSheet(f"font-weight: 600; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         row1.addWidget(algo_lbl)
 
         self.algo_combo = QComboBox()
-        self.algo_combo.setFixedWidth(170)
+        self.algo_combo.setMinimumWidth(160)
         for slug, cls in SORTING_ALGORITHMS.items():
             meta = cls().get_metadata()
             self.algo_combo.addItem(meta.name, slug)
         self.algo_combo.currentIndexChanged.connect(self._on_algorithm_changed)
         row1.addWidget(self.algo_combo)
 
-        row1.addSpacing(12)
+        row1.addSpacing(16)
+        size_lbl = QLabel("Size:")
+        size_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row1.addWidget(size_lbl)
 
-        # Preset generator buttons
-        row1.addWidget(QLabel("Presets:"))
-        
+        self.size_slider = QSlider(Qt.Orientation.Horizontal)
+        self.size_slider.setRange(5, 80)
+        self.size_slider.setValue(20)
+        self.size_slider.setFixedWidth(110)
+        self.size_slider.valueChanged.connect(self._on_size_slider_changed)
+        row1.addWidget(self.size_slider)
+
+        self.size_label = QLabel("20 elements")
+        self.size_label.setStyleSheet(f"color: {Colors.TEXT_MUTED}; min-width: 70px; background: transparent; border: none;")
+        row1.addWidget(self.size_label)
+
+        row1.addStretch()
+        layout.addLayout(row1)
+
+        # Row 2: Preset generator buttons
+        row2 = QHBoxLayout()
+        row2.setSpacing(8)
+        preset_lbl = QLabel("Presets:")
+        preset_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row2.addWidget(preset_lbl)
+
         presets = [
             ("Random", "random"),
             ("Nearly Sorted", "nearly_sorted"),
@@ -125,47 +146,35 @@ class SortingPage(QWidget):
             btn.setProperty("class", "secondary-btn")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda _, k=key: self._generate_preset(k))
-            row1.addWidget(btn)
+            row2.addWidget(btn)
 
-        row1.addStretch()
-        layout.addLayout(row1)
+        row2.addStretch()
+        layout.addLayout(row2)
 
-        # Row 2: Array Size slider + Manual Input Field
-        row2 = QHBoxLayout()
-        row2.setSpacing(12)
+        # Row 3: Custom array input
+        row3 = QHBoxLayout()
+        row3.setSpacing(8)
 
-        row2.addWidget(QLabel("Size:"))
-        self.size_slider = QSlider(Qt.Orientation.Horizontal)
-        self.size_slider.setRange(5, 80)
-        self.size_slider.setValue(20)
-        self.size_slider.setFixedWidth(130)
-        self.size_slider.valueChanged.connect(self._on_size_slider_changed)
-        row2.addWidget(self.size_slider)
+        custom_lbl = QLabel("Custom:")
+        custom_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row3.addWidget(custom_lbl)
 
-        self.size_label = QLabel("20 elements")
-        self.size_label.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; min-width: 75px;")
-        row2.addWidget(self.size_label)
-
-        row2.addSpacing(16)
-
-        # Manual entry
-        row2.addWidget(QLabel("Custom:"))
         self.manual_input = QLineEdit()
         self.manual_input.setPlaceholderText("e.g. 42, 15, -7, 88, 3, 26")
         self.manual_input.returnPressed.connect(self._on_apply_manual_input)
-        row2.addWidget(self.manual_input, 1)
+        row3.addWidget(self.manual_input, 1)
 
         apply_btn = QPushButton("Apply")
         apply_btn.setProperty("class", "secondary-btn")
         apply_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         apply_btn.clicked.connect(self._on_apply_manual_input)
-        row2.addWidget(apply_btn)
+        row3.addWidget(apply_btn)
 
-        layout.addLayout(row2)
+        layout.addLayout(row3)
 
         # Inline validation error label
         self.error_label = QLabel("")
-        self.error_label.setStyleSheet(f"color: {Colors.DANGER}; font-size: 11px;")
+        self.error_label.setStyleSheet(f"color: {Colors.DANGER}; font-size: 11px; background: transparent; border: none;")
         self.error_label.hide()
         layout.addWidget(self.error_label)
 
@@ -173,86 +182,95 @@ class SortingPage(QWidget):
 
     def _create_playback_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("SortingPlaybackCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingPlaybackCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 10px 14px;
             }}
         """)
-        layout = QHBoxLayout(card)
-        layout.setSpacing(10)
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(8)
 
-        # Play / Pause button
+        # Row 1: Playback Controls
+        row1 = QHBoxLayout()
+        row1.setSpacing(8)
+
         self.play_btn = QPushButton("▶ Start")
         self.play_btn.setProperty("class", "primary-btn")
-        self.play_btn.setFixedWidth(110)
+        self.play_btn.setMinimumWidth(90)
         self.play_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.play_btn.clicked.connect(self._on_play_pause_clicked)
-        layout.addWidget(self.play_btn)
+        row1.addWidget(self.play_btn)
 
-        # Step Backward
         self.step_back_btn = QPushButton("⏮ Step Back")
         self.step_back_btn.setProperty("class", "secondary-btn")
         self.step_back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.step_back_btn.clicked.connect(self.controller.step_backward)
-        layout.addWidget(self.step_back_btn)
+        row1.addWidget(self.step_back_btn)
 
-        # Step Forward
         self.step_fwd_btn = QPushButton("⏭ Step Forward")
         self.step_fwd_btn.setProperty("class", "secondary-btn")
         self.step_fwd_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.step_fwd_btn.clicked.connect(self.controller.step_forward)
-        layout.addWidget(self.step_fwd_btn)
+        row1.addWidget(self.step_fwd_btn)
 
-        # Reset button
         self.reset_btn = QPushButton("↺ Reset")
         self.reset_btn.setProperty("class", "secondary-btn")
         self.reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.reset_btn.clicked.connect(self._on_reset_clicked)
-        layout.addWidget(self.reset_btn)
+        row1.addWidget(self.reset_btn)
 
-        layout.addSpacing(16)
+        row1.addStretch()
+        layout.addLayout(row1)
 
-        # Speed adjustment slider
-        layout.addWidget(QLabel("Speed:"))
+        # Row 2: Speed adjustment + Benchmark action
+        row2 = QHBoxLayout()
+        row2.setSpacing(10)
+
+        speed_lbl = QLabel("Speed:")
+        speed_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row2.addWidget(speed_lbl)
+
         self.speed_slider = QSlider(Qt.Orientation.Horizontal)
         self.speed_slider.setRange(10, 800)
         self.speed_slider.setValue(150)
-        self.speed_slider.setFixedWidth(120)
+        self.speed_slider.setFixedWidth(130)
         self.speed_slider.valueChanged.connect(self._on_speed_changed)
-        layout.addWidget(self.speed_slider)
+        row2.addWidget(self.speed_slider)
 
         self.speed_label = QLabel("150 ms")
-        self.speed_label.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; min-width: 55px;")
-        layout.addWidget(self.speed_label)
+        self.speed_label.setStyleSheet(f"color: {Colors.TEXT_MUTED}; min-width: 50px; background: transparent; border: none;")
+        row2.addWidget(self.speed_label)
 
-        layout.addStretch()
+        row2.addStretch()
 
-        # Pure Benchmark button (measures algorithm execution without animation lag)
         self.bench_btn = QPushButton("⚡ Benchmark")
         self.bench_btn.setProperty("class", "secondary-btn")
         self.bench_btn.setToolTip("Run algorithm in isolation to measure pure execution runtime")
         self.bench_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.bench_btn.clicked.connect(self._on_run_benchmark)
-        layout.addWidget(self.bench_btn)
+        row2.addWidget(self.bench_btn)
+
+        layout.addLayout(row2)
 
         return card
 
     def _create_canvas_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("SortingCanvasCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingCanvasCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 10)
+        layout.setSpacing(10)
 
         # Canvas
         self.canvas = SortingCanvas()
@@ -260,26 +278,27 @@ class SortingPage(QWidget):
 
         # Legend row
         legend_row = QHBoxLayout()
-        legend_row.setSpacing(14)
-        legend_row.setContentsMargins(6, 4, 6, 0)
+        legend_row.setSpacing(10)
+        legend_row.setContentsMargins(4, 2, 4, 2)
 
         items = [
             ("#38bdf8", "Default"),
-            ("#f59e0b", "Comparing"),
-            ("#f43f5e", "Swap / Write"),
+            ("#f59e0b", "Compare"),
+            ("#f43f5e", "Swap/Write"),
             ("#c084fc", "Pivot"),
             ("#10b981", "Sorted"),
-            ("#818cf8", "Merge Range"),
+            ("#818cf8", "Merge"),
         ]
 
         for color_hex, text in items:
             box = QHBoxLayout()
-            box.setSpacing(5)
-            badge = QFrame()
-            badge.setFixedSize(12, 12)
+            box.setSpacing(6)
+            box.setContentsMargins(0, 0, 0, 0)
+            badge = QWidget()
+            badge.setFixedSize(10, 10)
             badge.setStyleSheet(f"background-color: {color_hex}; border-radius: 2px;")
             lbl = QLabel(text)
-            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED};")
+            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED}; background: transparent; border: none; padding: 0px;")
             box.addWidget(badge)
             box.addWidget(lbl)
             legend_row.addLayout(box)
@@ -293,52 +312,51 @@ class SortingPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background: transparent; }")
-        scroll.setMinimumWidth(320)
+        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
+        scroll.setMinimumWidth(300)
 
         container = QWidget()
-        container.setMinimumWidth(300)
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 8, 0)
         layout.setSpacing(12)
 
         # 1. Real-time Operations Stats Box
         stats_frame = QFrame()
+        stats_frame.setObjectName("SortingStatsCard")
         stats_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingStatsCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         s_layout = QVBoxLayout(stats_frame)
+        s_layout.setContentsMargins(14, 14, 14, 14)
         s_layout.setSpacing(10)
 
         s_header = QLabel("Operation Counters")
-        s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         s_layout.addWidget(s_header)
 
-        # Grid of stats
-        grid = QHBoxLayout()
-        self.stat_compares = self._add_stat_box(grid, "Comparisons", "0")
-        self.stat_swaps = self._add_stat_box(grid, "Swaps", "0")
-        self.stat_writes = self._add_stat_box(grid, "Writes", "0")
+        # 2-column Grid of stats
+        grid = QGridLayout()
+        grid.setSpacing(8)
+        self.stat_compares = self._add_stat_box(grid, 0, 0, "Comparisons", "0")
+        self.stat_swaps = self._add_stat_box(grid, 0, 1, "Swaps", "0")
+        self.stat_writes = self._add_stat_box(grid, 1, 0, "Writes", "0")
+        self.stat_steps = self._add_stat_box(grid, 1, 1, "Progress Step", "0 / 0")
+        self.stat_time = self._add_stat_box(grid, 2, 0, "Elapsed Time", "0.0 s", colspan=2)
         s_layout.addLayout(grid)
-
-        grid2 = QHBoxLayout()
-        self.stat_steps = self._add_stat_box(grid2, "Progress Step", "0 / 0")
-        self.stat_time = self._add_stat_box(grid2, "Elapsed Time", "0.0 s")
-        s_layout.addLayout(grid2)
 
         # Verification badge
         self.status_badge = QLabel("Status: Ready")
+        self.status_badge.setWordWrap(True)
         self.status_badge.setStyleSheet(f"""
             background-color: {Colors.BG_BASE};
             color: {Colors.TEXT_SECONDARY};
             border: 1px solid {Colors.BORDER_DEFAULT};
             border-radius: 6px;
-            padding: 8px;
+            padding: 8px 10px;
             font-size: 12px;
             font-weight: 600;
         """)
@@ -346,26 +364,28 @@ class SortingPage(QWidget):
 
         # Benchmark report row
         self.benchmark_lbl = QLabel("Pure Runtime Benchmark: Not run yet")
-        self.benchmark_lbl.setStyleSheet(f"color: {Colors.TEXT_MUTED}; font-size: 11px;")
+        self.benchmark_lbl.setWordWrap(True)
+        self.benchmark_lbl.setStyleSheet(f"color: {Colors.TEXT_MUTED}; font-size: 11px; padding: 2px; background: transparent; border: none;")
         s_layout.addWidget(self.benchmark_lbl)
 
         layout.addWidget(stats_frame)
 
         # 2. Complexity Card
         complexity_frame = QFrame()
+        complexity_frame.setObjectName("SortingComplexityCard")
         complexity_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingComplexityCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         c_layout = QVBoxLayout(complexity_frame)
+        c_layout.setContentsMargins(14, 14, 14, 14)
         c_layout.setSpacing(8)
 
         c_header = QLabel("Theoretical Complexity")
-        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         c_layout.addWidget(c_header)
 
         self.lbl_best = QLabel("Best: O(n)")
@@ -375,35 +395,37 @@ class SortingPage(QWidget):
         self.lbl_stable = QLabel("Stable: Yes")
 
         for lbl in (self.lbl_best, self.lbl_avg, self.lbl_worst, self.lbl_space, self.lbl_stable):
-            lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY};")
+            lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; background: transparent; border: none; padding: 0px;")
             c_layout.addWidget(lbl)
 
         layout.addWidget(complexity_frame)
 
         # 3. Pseudocode & Explanation Card
         pseudo_frame = QFrame()
+        pseudo_frame.setObjectName("SortingPseudoCard")
         pseudo_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#SortingPseudoCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         p_layout = QVBoxLayout(pseudo_frame)
+        p_layout.setContentsMargins(14, 14, 14, 14)
         p_layout.setSpacing(8)
 
         p_header = QLabel("Pseudocode & Logic")
-        p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         p_layout.addWidget(p_header)
 
         self.algo_desc = QLabel("")
         self.algo_desc.setWordWrap(True)
-        self.algo_desc.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4;")
+        self.algo_desc.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4; background: transparent; border: none; padding: 0px;")
         p_layout.addWidget(self.algo_desc)
 
         self.pseudo_label = QLabel("")
         self.pseudo_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.pseudo_label.setWordWrap(True)
         self.pseudo_label.setStyleSheet(f"""
             background-color: {Colors.BG_BASE};
             color: {Colors.PRIMARY_LIGHT};
@@ -421,28 +443,31 @@ class SortingPage(QWidget):
         scroll.setWidget(container)
         return scroll
 
-    def _add_stat_box(self, parent_layout: QHBoxLayout, title: str, initial_val: str) -> QLabel:
+    def _add_stat_box(self, grid: QGridLayout, row: int, col: int, title: str, initial_val: str, colspan: int = 1) -> QLabel:
         frame = QFrame()
+        frame_id = f"statBox_{row}_{col}"
+        frame.setObjectName(frame_id)
         frame.setStyleSheet(f"""
-            background-color: {Colors.BG_BASE};
-            border: 1px solid {Colors.BORDER_DEFAULT};
-            border-radius: 6px;
-            padding: 6px 10px;
+            QFrame#{frame_id} {{
+                background-color: {Colors.BG_BASE};
+                border: 1px solid {Colors.BORDER_DEFAULT};
+                border-radius: 6px;
+            }}
         """)
         l = QVBoxLayout(frame)
-        l.setContentsMargins(0, 0, 0, 0)
+        l.setContentsMargins(10, 8, 10, 8)
         l.setSpacing(2)
 
         t_lbl = QLabel(title)
         t_lbl.setWordWrap(True)
-        t_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {Colors.TEXT_MUTED}; text-transform: uppercase;")
+        t_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {Colors.TEXT_MUTED}; text-transform: uppercase; background: transparent; border: none; padding: 0px;")
         l.addWidget(t_lbl)
 
         v_lbl = QLabel(initial_val)
-        v_lbl.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        v_lbl.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none; padding: 0px;")
         l.addWidget(v_lbl)
 
-        parent_layout.addWidget(frame)
+        grid.addWidget(frame, row, col, 1, colspan)
         return v_lbl
 
     def _connect_signals(self):

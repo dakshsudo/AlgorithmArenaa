@@ -23,7 +23,7 @@ class GridCanvas(QWidget):
     def __init__(self, grid_map: GridMap, parent=None):
         super().__init__(parent)
         self.setObjectName("GridCanvas")
-        self.setMinimumSize(480, 360)
+        self.setMinimumSize(280, 200)
         self.setMouseTracking(True)
 
         self.grid = grid_map

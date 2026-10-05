@@ -13,7 +13,7 @@ class SortingCanvas(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("SortingCanvas")
-        self.setMinimumHeight(340)
+        self.setMinimumHeight(180)
         
         # Current data state
         self._array: List[int] = []
@@ -100,9 +100,9 @@ class SortingCanvas(QWidget):
             return
 
         n = len(self._array)
-        padding_x = 24
-        padding_top = 28
-        padding_bottom = 44
+        padding_x = 20
+        padding_top = 22
+        padding_bottom = 26
         chart_width = width - 2 * padding_x
         chart_height = height - padding_top - padding_bottom
 

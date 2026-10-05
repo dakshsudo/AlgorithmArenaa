@@ -1,7 +1,7 @@
 """Pathfinding Lab page: interactive grid editor, pathfinding algorithms, and visualization."""
 from typing import Optional, Tuple, List
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QComboBox, QSlider, QFrame, QScrollArea, QSplitter, QButtonGroup
 )
 from PySide6.QtCore import Qt
@@ -77,64 +77,79 @@ class PathfindingPage(QWidget):
 
     def _create_tools_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("PathToolsCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#PathToolsCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 10px 14px;
             }}
         """)
         layout = QVBoxLayout(card)
-        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
-        # Row 1: Algorithm selector + Grid Dimensions + Maze Presets
+        # Row 1: Algorithm selector
         row1 = QHBoxLayout()
         row1.setSpacing(10)
 
-        row1.addWidget(QLabel("Algorithm:"))
+        algo_lbl = QLabel("Algorithm:")
+        algo_lbl.setStyleSheet(f"font-weight: 600; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
+        row1.addWidget(algo_lbl)
+
         self.algo_combo = QComboBox()
-        self.algo_combo.setFixedWidth(190)
+        self.algo_combo.setMinimumWidth(210)
         for slug, cls in PATHFINDING_ALGORITHMS.items():
             meta = cls().get_metadata()
             self.algo_combo.addItem(meta.name, slug)
         self.algo_combo.currentIndexChanged.connect(self._on_algo_changed)
         row1.addWidget(self.algo_combo)
 
-        row1.addSpacing(10)
-        row1.addWidget(QLabel("Mazes:"))
+        row1.addStretch()
+        layout.addLayout(row1)
+
+        # Row 2: Maze Presets
+        row2 = QHBoxLayout()
+        row2.setSpacing(8)
+
+        maze_lbl = QLabel("Mazes:")
+        maze_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row2.addWidget(maze_lbl)
 
         btn_rnd = QPushButton("Random")
         btn_rnd.setProperty("class", "secondary-btn")
         btn_rnd.clicked.connect(lambda: self._apply_maze("random"))
-        row1.addWidget(btn_rnd)
+        row2.addWidget(btn_rnd)
 
         btn_div = QPushButton("Recursive Division")
         btn_div.setProperty("class", "secondary-btn")
         btn_div.clicked.connect(lambda: self._apply_maze("division"))
-        row1.addWidget(btn_div)
+        row2.addWidget(btn_div)
 
         btn_river = QPushButton("Weighted Terrain")
         btn_river.setProperty("class", "secondary-btn")
         btn_river.clicked.connect(lambda: self._apply_maze("river"))
-        row1.addWidget(btn_river)
+        row2.addWidget(btn_river)
 
-        row1.addStretch()
-        layout.addLayout(row1)
+        row2.addStretch()
+        layout.addLayout(row2)
 
-        # Row 2: Drawing Tools & Clearing Options
-        row2 = QHBoxLayout()
-        row2.setSpacing(8)
+        # Row 3: Drawing Tools & Clearing Options
+        row3 = QHBoxLayout()
+        row3.setSpacing(6)
 
-        row2.addWidget(QLabel("Drawing Tool:"))
+        tool_lbl = QLabel("Tools:")
+        tool_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row3.addWidget(tool_lbl)
+
         self.tool_group = QButtonGroup(self)
 
         tools = [
             ("Wall", EditMode.WALL),
-            ("Weight (5x)", EditMode.WEIGHT),
+            ("Weight", EditMode.WEIGHT),
             ("Erase", EditMode.ERASE),
-            ("Move Start", EditMode.START),
-            ("Move Target", EditMode.TARGET),
+            ("Start", EditMode.START),
+            ("Target", EditMode.TARGET),
         ]
 
         for text, mode in tools:
@@ -145,123 +160,164 @@ class PathfindingPage(QWidget):
                 btn.setChecked(True)
             btn.clicked.connect(lambda _, m=mode: self.canvas.set_edit_mode(m))
             self.tool_group.addButton(btn)
-            row2.addWidget(btn)
+            row3.addWidget(btn)
 
-        row2.addSpacing(16)
+        row3.addStretch()
 
         btn_clear_path = QPushButton("Clear Path")
         btn_clear_path.setProperty("class", "secondary-btn")
         btn_clear_path.setToolTip("Keep walls and reset search traversal")
         btn_clear_path.clicked.connect(self._on_clear_path)
-        row2.addWidget(btn_clear_path)
+        row3.addWidget(btn_clear_path)
 
         btn_clear_all = QPushButton("Clear All")
         btn_clear_all.setProperty("class", "secondary-btn")
         btn_clear_all.clicked.connect(self._on_clear_all)
-        row2.addWidget(btn_clear_all)
+        row3.addWidget(btn_clear_all)
+
+        layout.addLayout(row3)
+
+        return card
+
+    def _create_playback_card(self) -> QFrame:
+        card = QFrame()
+        card.setObjectName("PathPlaybackCard")
+        card.setStyleSheet(f"""
+            QFrame#PathPlaybackCard {{
+                background-color: {Colors.BG_SURFACE};
+                border: 1px solid {Colors.BORDER_DEFAULT};
+                border-radius: 10px;
+            }}
+        """)
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(8)
+
+        # Row 1: Playback Controls
+        row1 = QHBoxLayout()
+        row1.setSpacing(8)
+
+        self.play_btn = QPushButton("▶ Start Search")
+        self.play_btn.setProperty("class", "primary-btn")
+        self.play_btn.setMinimumWidth(110)
+        self.play_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.play_btn.clicked.connect(self._on_play_pause_clicked)
+        row1.addWidget(self.play_btn)
+
+        self.step_back_btn = QPushButton("⏮ Step Back")
+        self.step_back_btn.setProperty("class", "secondary-btn")
+        self.step_back_btn.clicked.connect(self.controller.step_backward)
+        row1.addWidget(self.step_back_btn)
+
+        self.step_fwd_btn = QPushButton("⏭ Step Forward")
+        self.step_fwd_btn.setProperty("class", "secondary-btn")
+        self.step_fwd_btn.clicked.connect(self.controller.step_forward)
+        row1.addWidget(self.step_fwd_btn)
+
+        self.reset_btn = QPushButton("↺ Reset")
+        self.reset_btn.setProperty("class", "secondary-btn")
+        self.reset_btn.clicked.connect(self._on_clear_path)
+        row1.addWidget(self.reset_btn)
+
+        row1.addStretch()
+        layout.addLayout(row1)
+
+        # Row 2: Speed adjustment
+        row2 = QHBoxLayout()
+        row2.setSpacing(10)
+
+        speed_lbl = QLabel("Speed:")
+        speed_lbl.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; background: transparent; border: none;")
+        row2.addWidget(speed_lbl)
+
+        self.speed_slider = QSlider(Qt.Orientation.Horizontal)
+        self.speed_slider.setRange(5, 250)
+        self.speed_slider.setValue(40)
+        self.speed_slider.setFixedWidth(130)
+        self.speed_slider.valueChanged.connect(self._on_speed_changed)
+        row2.addWidget(self.speed_slider)
+
+        self.speed_label = QLabel("40 ms")
+        self.speed_label.setStyleSheet(f"color: {Colors.TEXT_MUTED}; min-width: 50px; background: transparent; border: none;")
+        row2.addWidget(self.speed_label)
 
         row2.addStretch()
         layout.addLayout(row2)
 
         return card
 
-    def _create_playback_card(self) -> QFrame:
-        card = QFrame()
-        card.setStyleSheet(f"""
-            QFrame {{
-                background-color: {Colors.BG_SURFACE};
-                border: 1px solid {Colors.BORDER_DEFAULT};
-                border-radius: 10px;
-                padding: 10px 14px;
-            }}
-        """)
-        layout = QHBoxLayout(card)
-        layout.setSpacing(10)
-
-        self.play_btn = QPushButton("▶ Start Search")
-        self.play_btn.setProperty("class", "primary-btn")
-        self.play_btn.setFixedWidth(130)
-        self.play_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.play_btn.clicked.connect(self._on_play_pause_clicked)
-        layout.addWidget(self.play_btn)
-
-        self.step_back_btn = QPushButton("⏮ Step Back")
-        self.step_back_btn.setProperty("class", "secondary-btn")
-        self.step_back_btn.clicked.connect(self.controller.step_backward)
-        layout.addWidget(self.step_back_btn)
-
-        self.step_fwd_btn = QPushButton("⏭ Step Forward")
-        self.step_fwd_btn.setProperty("class", "secondary-btn")
-        self.step_fwd_btn.clicked.connect(self.controller.step_forward)
-        layout.addWidget(self.step_fwd_btn)
-
-        self.reset_btn = QPushButton("↺ Reset")
-        self.reset_btn.setProperty("class", "secondary-btn")
-        self.reset_btn.clicked.connect(self._on_clear_path)
-        layout.addWidget(self.reset_btn)
-
-        layout.addSpacing(16)
-        layout.addWidget(QLabel("Speed:"))
-        self.speed_slider = QSlider(Qt.Orientation.Horizontal)
-        self.speed_slider.setRange(5, 250)
-        self.speed_slider.setValue(40)
-        self.speed_slider.setFixedWidth(110)
-        self.speed_slider.valueChanged.connect(self._on_speed_changed)
-        layout.addWidget(self.speed_slider)
-
-        self.speed_label = QLabel("40 ms")
-        self.speed_label.setStyleSheet(f"color: {Colors.TEXT_SECONDARY}; min-width: 50px;")
-        layout.addWidget(self.speed_label)
-
-        layout.addStretch()
-        return card
-
     def _create_canvas_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("PathCanvasCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#PathCanvasCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 10px;
             }}
         """)
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 10)
+        layout.setSpacing(10)
 
         self.canvas = GridCanvas(self.grid)
         self.canvas.grid_modified.connect(self._on_grid_modified)
         layout.addWidget(self.canvas, 1)
 
-        # Legend row
-        legend = QHBoxLayout()
-        legend.setSpacing(14)
-        legend_items = [
+        # Legend (2 rows to ensure zero truncation)
+        legend_layout = QVBoxLayout()
+        legend_layout.setSpacing(4)
+        legend_layout.setContentsMargins(4, 2, 4, 2)
+
+        row_top = QHBoxLayout()
+        row_top.setSpacing(14)
+        row_bot = QHBoxLayout()
+        row_bot.setSpacing(14)
+
+        top_items = [
             ("#22c55e", "Start (S)"),
             ("#ef4444", "Target (T)"),
             ("#334155", "Wall"),
             ("#854d0e", "5x Weight"),
+        ]
+        bot_items = [
             ("#f59e0b", "Frontier"),
             ("#3b82f6", "Visited"),
             ("#ec4899", "Current"),
             ("#10b981", "Final Path"),
         ]
 
-        for color_hex, text in legend_items:
+        for color_hex, text in top_items:
             box = QHBoxLayout()
-            box.setSpacing(5)
-            badge = QFrame()
-            badge.setFixedSize(12, 12)
+            box.setSpacing(6)
+            box.setContentsMargins(0, 0, 0, 0)
+            badge = QWidget()
+            badge.setFixedSize(10, 10)
             badge.setStyleSheet(f"background-color: {color_hex}; border-radius: 2px;")
             lbl = QLabel(text)
-            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED};")
+            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED}; background: transparent; border: none; padding: 0px;")
             box.addWidget(badge)
             box.addWidget(lbl)
-            legend.addLayout(box)
+            row_top.addLayout(box)
+        row_top.addStretch()
 
-        legend.addStretch()
-        layout.addLayout(legend)
+        for color_hex, text in bot_items:
+            box = QHBoxLayout()
+            box.setSpacing(6)
+            box.setContentsMargins(0, 0, 0, 0)
+            badge = QWidget()
+            badge.setFixedSize(10, 10)
+            badge.setStyleSheet(f"background-color: {color_hex}; border-radius: 2px;")
+            lbl = QLabel(text)
+            lbl.setStyleSheet(f"font-size: 11px; color: {Colors.TEXT_MUTED}; background: transparent; border: none; padding: 0px;")
+            box.addWidget(badge)
+            box.addWidget(lbl)
+            row_bot.addLayout(box)
+        row_bot.addStretch()
+
+        legend_layout.addLayout(row_top)
+        legend_layout.addLayout(row_bot)
+        layout.addLayout(legend_layout)
 
         return card
 
@@ -269,54 +325,50 @@ class PathfindingPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background: transparent; }")
-        scroll.setMinimumWidth(320)
+        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
+        scroll.setMinimumWidth(300)
 
         container = QWidget()
-        container.setMinimumWidth(300)
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 8, 0)
         layout.setSpacing(12)
 
         # 1. Operation Counters Box
         stats_frame = QFrame()
+        stats_frame.setObjectName("PathStatsCard")
         stats_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#PathStatsCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         s_layout = QVBoxLayout(stats_frame)
+        s_layout.setContentsMargins(14, 14, 14, 14)
         s_layout.setSpacing(10)
 
         s_header = QLabel("Search Metrics")
-        s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         s_layout.addWidget(s_header)
 
-        grid1 = QHBoxLayout()
-        self.stat_visited = self._add_stat_box(grid1, "Nodes Visited", "0")
-        self.stat_frontier = self._add_stat_box(grid1, "Frontier Nodes", "0")
-        s_layout.addLayout(grid1)
-
-        grid2 = QHBoxLayout()
-        self.stat_length = self._add_stat_box(grid2, "Path Length", "0")
-        self.stat_cost = self._add_stat_box(grid2, "Total Cost", "0")
-        s_layout.addLayout(grid2)
-
-        grid3 = QHBoxLayout()
-        self.stat_step = self._add_stat_box(grid3, "Step Index", "0 / 0")
-        self.stat_time = self._add_stat_box(grid3, "Elapsed Time", "0.0 s")
-        s_layout.addLayout(grid3)
+        grid = QGridLayout()
+        grid.setSpacing(8)
+        self.stat_visited = self._add_stat_box(grid, 0, 0, "Nodes Visited", "0")
+        self.stat_frontier = self._add_stat_box(grid, 0, 1, "Frontier Nodes", "0")
+        self.stat_length = self._add_stat_box(grid, 1, 0, "Path Length", "0")
+        self.stat_cost = self._add_stat_box(grid, 1, 1, "Total Cost", "0")
+        self.stat_step = self._add_stat_box(grid, 2, 0, "Step Index", "0 / 0")
+        self.stat_time = self._add_stat_box(grid, 2, 1, "Elapsed Time", "0.0 s")
+        s_layout.addLayout(grid)
 
         self.status_badge = QLabel("Status: Ready to Search")
+        self.status_badge.setWordWrap(True)
         self.status_badge.setStyleSheet(f"""
             background-color: {Colors.BG_BASE};
             color: {Colors.TEXT_SECONDARY};
             border: 1px solid {Colors.BORDER_DEFAULT};
             border-radius: 6px;
-            padding: 8px;
+            padding: 8px 10px;
             font-size: 12px;
             font-weight: 600;
         """)
@@ -325,19 +377,20 @@ class PathfindingPage(QWidget):
 
         # 2. Complexity Card
         complexity_frame = QFrame()
+        complexity_frame.setObjectName("PathComplexityCard")
         complexity_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#PathComplexityCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         c_layout = QVBoxLayout(complexity_frame)
+        c_layout.setContentsMargins(14, 14, 14, 14)
         c_layout.setSpacing(8)
 
         c_header = QLabel("Theoretical Properties")
-        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         c_layout.addWidget(c_header)
 
         self.lbl_guarantee = QLabel("Guarantees Shortest Path: Yes")
@@ -346,35 +399,37 @@ class PathfindingPage(QWidget):
         self.lbl_space = QLabel("Space Complexity: O(V)")
 
         for lbl in (self.lbl_guarantee, self.lbl_weights, self.lbl_time, self.lbl_space):
-            lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY};")
+            lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; background: transparent; border: none; padding: 0px;")
             c_layout.addWidget(lbl)
 
         layout.addWidget(complexity_frame)
 
         # 3. Pseudocode & Explanation
         pseudo_frame = QFrame()
+        pseudo_frame.setObjectName("PathPseudoCard")
         pseudo_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#PathPseudoCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         p_layout = QVBoxLayout(pseudo_frame)
+        p_layout.setContentsMargins(14, 14, 14, 14)
         p_layout.setSpacing(8)
 
         p_header = QLabel("Algorithm Explanation & Logic")
-        p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         p_layout.addWidget(p_header)
 
         self.algo_desc = QLabel("")
         self.algo_desc.setWordWrap(True)
-        self.algo_desc.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4;")
+        self.algo_desc.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4; background: transparent; border: none; padding: 0px;")
         p_layout.addWidget(self.algo_desc)
 
         self.pseudo_label = QLabel("")
         self.pseudo_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.pseudo_label.setWordWrap(True)
         self.pseudo_label.setStyleSheet(f"""
             background-color: {Colors.BG_BASE};
             color: {Colors.PRIMARY_LIGHT};
@@ -392,28 +447,31 @@ class PathfindingPage(QWidget):
         scroll.setWidget(container)
         return scroll
 
-    def _add_stat_box(self, parent_layout: QHBoxLayout, title: str, initial_val: str) -> QLabel:
+    def _add_stat_box(self, grid: QGridLayout, row: int, col: int, title: str, initial_val: str, colspan: int = 1) -> QLabel:
         frame = QFrame()
+        frame_id = f"pathStatBox_{row}_{col}"
+        frame.setObjectName(frame_id)
         frame.setStyleSheet(f"""
-            background-color: {Colors.BG_BASE};
-            border: 1px solid {Colors.BORDER_DEFAULT};
-            border-radius: 6px;
-            padding: 6px 10px;
+            QFrame#{frame_id} {{
+                background-color: {Colors.BG_BASE};
+                border: 1px solid {Colors.BORDER_DEFAULT};
+                border-radius: 6px;
+            }}
         """)
         l = QVBoxLayout(frame)
-        l.setContentsMargins(0, 0, 0, 0)
+        l.setContentsMargins(10, 8, 10, 8)
         l.setSpacing(2)
 
         t_lbl = QLabel(title)
         t_lbl.setWordWrap(True)
-        t_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {Colors.TEXT_MUTED}; text-transform: uppercase;")
+        t_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {Colors.TEXT_MUTED}; text-transform: uppercase; background: transparent; border: none; padding: 0px;")
         l.addWidget(t_lbl)
 
         v_lbl = QLabel(initial_val)
-        v_lbl.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        v_lbl.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none; padding: 0px;")
         l.addWidget(v_lbl)
 
-        parent_layout.addWidget(frame)
+        grid.addWidget(frame, row, col, 1, colspan)
         return v_lbl
 
     def _connect_signals(self):

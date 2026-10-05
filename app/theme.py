@@ -61,6 +61,11 @@ QWidget {{
     font-size: 13px;
 }}
 
+QLabel {{
+    background-color: transparent;
+    border: none;
+}}
+
 /* Tooltips */
 QToolTip {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
@@ -119,14 +124,14 @@ QPushButton.nav-btn:checked, QPushButton.nav-btn.active {{
 }}
 
 /* Generic Cards & Panels */
-QFrame.card {{
+QFrame.card, QFrame[class="card"] {{
     background-color: {Colors.BG_SURFACE};
     border: 1px solid {Colors.BORDER_DEFAULT};
     border-radius: 10px;
     padding: 16px;
 }}
 
-QFrame.card-elevated {{
+QFrame.card-elevated, QFrame[class="card-elevated"] {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
     border: 1px solid {Colors.BORDER_DEFAULT};
     border-radius: 10px;
@@ -134,67 +139,68 @@ QFrame.card-elevated {{
 }}
 
 /* Header labels */
-QLabel.page-title {{
+QLabel.page-title, QLabel[class="page-title"] {{
     font-size: 22px;
     font-weight: 700;
     color: {Colors.TEXT_PRIMARY};
 }}
 
-QLabel.page-desc {{
+QLabel.page-desc, QLabel[class="page-desc"] {{
     font-size: 13px;
     color: {Colors.TEXT_SECONDARY};
     margin-bottom: 8px;
 }}
 
-QLabel.section-title {{
+QLabel.section-title, QLabel[class="section-title"] {{
     font-size: 15px;
     font-weight: 600;
     color: {Colors.TEXT_PRIMARY};
 }}
 
 /* Buttons */
-QPushButton.primary-btn {{
+QPushButton.primary-btn, QPushButton[class="primary-btn"] {{
     background-color: {Colors.PRIMARY};
     color: {Colors.TEXT_INVERTED};
     border: none;
     border-radius: 6px;
-    padding: 8px 16px;
+    padding: 6px 12px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
 }}
 
-QPushButton.primary-btn:hover {{
+QPushButton.primary-btn:hover, QPushButton[class="primary-btn"]:hover {{
     background-color: {Colors.PRIMARY_LIGHT};
 }}
 
-QPushButton.primary-btn:pressed {{
+QPushButton.primary-btn:pressed, QPushButton[class="primary-btn"]:pressed {{
     background-color: {Colors.PRIMARY_DARK};
 }}
 
-QPushButton.primary-btn:disabled {{
+QPushButton.primary-btn:disabled, QPushButton[class="primary-btn"]:disabled {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
     color: {Colors.TEXT_MUTED};
 }}
 
-QPushButton.secondary-btn {{
+QPushButton.secondary-btn, QPushButton[class="secondary-btn"] {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
     color: {Colors.TEXT_PRIMARY};
     border: 1px solid {Colors.BORDER_DEFAULT};
     border-radius: 6px;
-    padding: 8px 14px;
+    padding: 5px 10px;
     font-weight: 500;
+    font-size: 12px;
 }}
 
-QPushButton.secondary-btn:hover {{
+QPushButton.secondary-btn:hover, QPushButton[class="secondary-btn"]:hover {{
     background-color: {Colors.BG_SURFACE_HOVER};
     border-color: {Colors.BORDER_FOCUS};
 }}
 
-QPushButton.secondary-btn:pressed {{
+QPushButton.secondary-btn:pressed, QPushButton[class="secondary-btn"]:pressed {{
     background-color: {Colors.BG_SURFACE};
 }}
 
-QPushButton.secondary-btn:disabled {{
+QPushButton.secondary-btn:disabled, QPushButton[class="secondary-btn"]:disabled {{
     color: {Colors.TEXT_MUTED};
     border-color: {Colors.BORDER_DEFAULT};
 }}

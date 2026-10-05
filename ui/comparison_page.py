@@ -66,22 +66,23 @@ class ComparisonPage(QWidget):
 
         # 4. Methodology Note Card
         note_card = QFrame()
+        note_card.setObjectName("CompNoteCard")
         note_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompNoteCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         n_layout = QVBoxLayout(note_card)
+        n_layout.setContentsMargins(14, 14, 14, 14)
         n_lbl = QLabel(
             "<b>🔬 Benchmarking Methodology:</b> Algorithms are executed in complete isolation on independent cloned "
             "copies of the exact same test input. Pure wall-clock execution time is recorded with sub-millisecond precision "
             "via <code>time.perf_counter_ns()</code>, completely separated from UI rendering and animation frames."
         )
         n_lbl.setWordWrap(True)
-        n_lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4;")
+        n_lbl.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_SECONDARY}; line-height: 1.4; background: transparent; border: none; padding: 0px;")
         n_layout.addWidget(n_lbl)
         layout.addWidget(note_card)
 
@@ -90,15 +91,16 @@ class ComparisonPage(QWidget):
 
     def _create_config_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("CompConfigCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompConfigCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(10)
 
         # Row 1: Category Selection
@@ -174,19 +176,20 @@ class ComparisonPage(QWidget):
 
     def _create_table_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("CompTableCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompTableCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(8)
 
         t_lbl = QLabel("Benchmark Results Table")
-        t_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        t_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none; padding: 0px;")
         layout.addWidget(t_lbl)
 
         self.table = QTableWidget()
@@ -204,20 +207,21 @@ class ComparisonPage(QWidget):
 
     def _create_chart_card(self) -> QFrame:
         card = QFrame()
+        card.setObjectName("CompChartCard")
         card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#CompChartCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 12px;
             }}
         """)
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(8)
 
         header_row = QHBoxLayout()
         c_lbl = QLabel("Comparative Performance Visualization")
-        c_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        c_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none; padding: 0px;")
         header_row.addWidget(c_lbl)
         header_row.addStretch()
 

@@ -137,15 +137,16 @@ class LearningPage(QWidget):
 
         # Note Card
         self.note_card = QFrame()
+        self.note_card.setObjectName("LearnNoteCard")
         self.note_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#LearnNoteCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 16px;
             }}
         """)
         self.note_layout = QVBoxLayout(self.note_card)
+        self.note_layout.setContentsMargins(16, 16, 16, 16)
         self.note_layout.setSpacing(12)
 
         self.lbl_note_title = QLabel("")
@@ -226,15 +227,17 @@ class LearningPage(QWidget):
 
         for idx, item in enumerate(self.viva_data, 1):
             q_frame = QFrame()
+            frame_id = f"vivaCard_{idx}"
+            q_frame.setObjectName(frame_id)
             q_frame.setStyleSheet(f"""
-                QFrame {{
+                QFrame#{frame_id} {{
                     background-color: {Colors.BG_SURFACE};
                     border: 1px solid {Colors.BORDER_DEFAULT};
                     border-radius: 8px;
-                    padding: 12px;
                 }}
             """)
             q_layout = QVBoxLayout(q_frame)
+            q_layout.setContentsMargins(12, 12, 12, 12)
             q_layout.setSpacing(6)
 
             q_text = QLabel(f"<b>Q{idx}. [{item.get('category')}] {item.get('question')}</b>")
@@ -284,15 +287,16 @@ class LearningPage(QWidget):
 
         # Options Container
         self.options_frame = QFrame()
+        self.options_frame.setObjectName("QuizOptionsCard")
         self.options_frame.setStyleSheet(f"""
-            QFrame {{
+            QFrame#QuizOptionsCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 16px;
             }}
         """)
         self.options_layout = QVBoxLayout(self.options_frame)
+        self.options_layout.setContentsMargins(16, 16, 16, 16)
         self.options_layout.setSpacing(10)
 
         self.radio_group = QButtonGroup(self)
@@ -320,16 +324,17 @@ class LearningPage(QWidget):
 
         # Feedback box
         self.quiz_feedback_box = QFrame()
+        self.quiz_feedback_box.setObjectName("QuizFeedbackCard")
         self.quiz_feedback_box.setStyleSheet(f"""
-            QFrame {{
+            QFrame#QuizFeedbackCard {{
                 background-color: {Colors.BG_SURFACE_ELEVATED};
                 border-radius: 8px;
-                padding: 12px;
                 border: 1px solid {Colors.BORDER_DEFAULT};
             }}
         """)
         self.quiz_feedback_box.hide()
         f_layout = QVBoxLayout(self.quiz_feedback_box)
+        f_layout.setContentsMargins(12, 12, 12, 12)
         self.feedback_title = QLabel("")
         self.feedback_title.setStyleSheet("font-weight: 700; font-size: 13px;")
         self.feedback_desc = QLabel("")
@@ -436,19 +441,20 @@ class LearningPage(QWidget):
 
         # Overview Stats Card
         stat_card = QFrame()
+        stat_card.setObjectName("LearnOverviewCard")
         stat_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#LearnOverviewCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 16px;
             }}
         """)
         s_layout = QVBoxLayout(stat_card)
+        s_layout.setContentsMargins(16, 16, 16, 16)
         s_layout.setSpacing(10)
 
         s_header = QLabel("Learning Curriculum Progress")
-        s_header.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        s_header.setStyleSheet(f"font-size: 15px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         s_layout.addWidget(s_header)
 
         self.progress_bar = QProgressBar()
@@ -470,26 +476,27 @@ class LearningPage(QWidget):
         s_layout.addWidget(self.progress_bar)
 
         self.lbl_completed_count = QLabel("")
-        self.lbl_completed_count.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_MUTED};")
+        self.lbl_completed_count.setStyleSheet(f"font-size: 12px; color: {Colors.TEXT_MUTED}; background: transparent; border: none;")
         s_layout.addWidget(self.lbl_completed_count)
 
         layout.addWidget(stat_card)
 
         # Quiz History Table Card
         table_card = QFrame()
+        table_card.setObjectName("LearnHistoryCard")
         table_card.setStyleSheet(f"""
-            QFrame {{
+            QFrame#LearnHistoryCard {{
                 background-color: {Colors.BG_SURFACE};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 10px;
-                padding: 14px;
             }}
         """)
         t_layout = QVBoxLayout(table_card)
+        t_layout.setContentsMargins(14, 14, 14, 14)
         t_layout.setSpacing(8)
 
         t_lbl = QLabel("Recent Quiz Score History (SQLite Persisted)")
-        t_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY};")
+        t_lbl.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         t_layout.addWidget(t_lbl)
 
         self.history_table = QTableWidget()
