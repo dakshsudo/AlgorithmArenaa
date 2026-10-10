@@ -48,6 +48,7 @@ class PathfindingPage(QWidget):
 
         # --- Left Column: Controls + Grid Canvas ---
         left_container = QWidget()
+        left_container.setMinimumWidth(580)
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(0, 0, 12, 0)
         left_layout.setSpacing(12)
@@ -70,6 +71,8 @@ class PathfindingPage(QWidget):
         right_container = self._create_sidebar_info()
         main_splitter.addWidget(right_container)
 
+        main_splitter.setCollapsible(0, False)
+        main_splitter.setCollapsible(1, False)
         main_splitter.setStretchFactor(0, 3)
         main_splitter.setStretchFactor(1, 2)
         main_splitter.setSizes([680, 340])
@@ -326,9 +329,10 @@ class PathfindingPage(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
-        scroll.setMinimumWidth(300)
+        scroll.setMinimumWidth(320)
 
         container = QWidget()
+        container.setMinimumWidth(300)
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 8, 0)
         layout.setSpacing(12)
@@ -348,6 +352,7 @@ class PathfindingPage(QWidget):
         s_layout.setSpacing(10)
 
         s_header = QLabel("Search Metrics")
+        s_header.setWordWrap(True)
         s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         s_layout.addWidget(s_header)
 
@@ -364,7 +369,7 @@ class PathfindingPage(QWidget):
         self.status_badge = QLabel("Status: Ready to Search")
         self.status_badge.setWordWrap(True)
         self.status_badge.setStyleSheet(f"""
-            background-color: {Colors.BG_BASE};
+            background-color: {Colors.BG_SURFACE_ELEVATED};
             color: {Colors.TEXT_SECONDARY};
             border: 1px solid {Colors.BORDER_DEFAULT};
             border-radius: 6px;
@@ -390,6 +395,7 @@ class PathfindingPage(QWidget):
         c_layout.setSpacing(8)
 
         c_header = QLabel("Theoretical Properties")
+        c_header.setWordWrap(True)
         c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         c_layout.addWidget(c_header)
 
@@ -419,6 +425,7 @@ class PathfindingPage(QWidget):
         p_layout.setSpacing(8)
 
         p_header = QLabel("Algorithm Explanation & Logic")
+        p_header.setWordWrap(True)
         p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         p_layout.addWidget(p_header)
 
@@ -453,7 +460,7 @@ class PathfindingPage(QWidget):
         frame.setObjectName(frame_id)
         frame.setStyleSheet(f"""
             QFrame#{frame_id} {{
-                background-color: {Colors.BG_BASE};
+                background-color: {Colors.BG_SURFACE_ELEVATED};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 6px;
             }}
@@ -531,14 +538,19 @@ class PathfindingPage(QWidget):
         events, path, cost = self.current_pathfinder.search(self.grid)
         self.controller.load_events(events)
 
+        steps = max(0, len(path) - 1) if path else 0
+        self.step_back_btn.setEnabled(False)
+        self.step_fwd_btn.setEnabled(len(events) > 0)
+        self.play_btn.setEnabled(len(events) > 0)
+
         self.stat_visited.setText("0")
         self.stat_frontier.setText("0")
-        self.stat_length.setText(f"{len(path)} steps" if path else "0")
+        self.stat_length.setText(f"{steps} steps" if path else "0")
         self.stat_cost.setText(str(cost))
         self.stat_step.setText(f"0 / {len(events)}")
         self.stat_time.setText("0.0 s")
         self.status_badge.setText("Status: Ready to Search")
-        self.status_badge.setStyleSheet(f"background-color: {Colors.BG_BASE}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
+        self.status_badge.setStyleSheet(f"background-color: {Colors.BG_SURFACE_ELEVATED}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
 
     def _on_play_pause_clicked(self):
         if self.controller.state == RunState.RUNNING:
@@ -550,6 +562,8 @@ class PathfindingPage(QWidget):
 
     def _on_step_changed(self, curr_step: int, total_steps: int, event: Optional[PathEvent]):
         self.stat_step.setText(f"{curr_step} / {total_steps}")
+        self.step_back_btn.setEnabled(curr_step > 0)
+        self.step_fwd_btn.setEnabled(curr_step < total_steps)
         self.canvas.set_event(event)
 
     def _on_state_changed(self, state_str: str):
@@ -563,10 +577,11 @@ class PathfindingPage(QWidget):
             self.status_badge.setStyleSheet(f"background-color: rgba(129, 140, 248, 0.15); color: {Colors.SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.SECONDARY};")
         elif state_str == RunState.FINISHED.value:
             self.play_btn.setText("↺ Restart")
+            self.step_fwd_btn.setEnabled(False)
         else:
             self.play_btn.setText("▶ Start Search")
             self.status_badge.setText("Status: Ready to Search")
-            self.status_badge.setStyleSheet(f"background-color: {Colors.BG_BASE}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
+            self.status_badge.setStyleSheet(f"background-color: {Colors.BG_SURFACE_ELEVATED}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
 
     def _on_stats_updated(self, visited_count: int, frontier_count: int, current_cost: float, elapsed_ms: int):
         self.stat_visited.setText(str(visited_count))

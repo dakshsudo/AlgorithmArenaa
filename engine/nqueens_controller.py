@@ -11,7 +11,7 @@ class NQueensPlaybackController(QObject):
 
     step_changed = Signal(int, int, object)       # (curr_step, total_steps, NQueensEvent)
     state_changed = Signal(str)                   # (RunState)
-    stats_updated = Signal(int, int, int, int, int) # (attempts, conflicts, solutions, depth, elapsed_ms)
+    stats_updated = Signal(int, int, int, int, int, int) # (attempts, conflicts, backtracks, solutions, depth, elapsed_ms)
     solution_discovered = Signal(int, list)       # (sol_index, queens_list)
     finished = Signal(int, int, int, str)         # (total_sols, attempts, conflicts, message)
 
@@ -28,7 +28,7 @@ class NQueensPlaybackController(QObject):
         self._last_tick_time: float = 0.0
 
         # Cumulative metrics cache for instant stepping
-        self._cumulative_stats: List[tuple] = [] # (attempts, conflicts, solutions, depth)
+        self._cumulative_stats: List[tuple] = [] # (attempts, conflicts, backtracks, solutions, depth)
 
     @property
     def state(self) -> RunState:
@@ -57,6 +57,7 @@ class NQueensPlaybackController(QObject):
         self._cumulative_stats.clear()
         att = 0
         cnf = 0
+        bck = 0
         sols = 0
 
         for ev in self._events:
@@ -64,15 +65,17 @@ class NQueensPlaybackController(QObject):
                 att += 1
             elif ev.event_type == NQueensEventType.CONFLICT:
                 cnf += 1
+            elif ev.event_type == NQueensEventType.BACKTRACK:
+                bck += 1
             elif ev.event_type == NQueensEventType.SOLUTION_FOUND:
                 sols += 1
             
             # depth is number of queens currently placed
             depth = sum(1 for q in ev.queens if q >= 0)
-            self._cumulative_stats.append((att, cnf, sols, depth))
+            self._cumulative_stats.append((att, cnf, bck, sols, depth))
 
         self.step_changed.emit(0, len(self._events), None)
-        self.stats_updated.emit(0, 0, 0, 0, 0)
+        self.stats_updated.emit(0, 0, 0, 0, 0, 0)
         self._set_state(RunState.IDLE)
 
     def play(self):
@@ -100,12 +103,15 @@ class NQueensPlaybackController(QObject):
         self._current_index = -1
         self._elapsed_ms = 0
         self.step_changed.emit(0, len(self._events), None)
-        self.stats_updated.emit(0, 0, 0, 0, 0)
+        self.stats_updated.emit(0, 0, 0, 0, 0, 0)
         self._set_state(RunState.IDLE)
 
     def step_forward(self) -> bool:
         if self._state == RunState.RUNNING:
             self.pause()
+
+        if self._state == RunState.FINISHED:
+            return False
 
         if self._current_index < len(self._events) - 1:
             self._current_index += 1
@@ -127,12 +133,15 @@ class NQueensPlaybackController(QObject):
         elif self._current_index == 0:
             self._current_index = -1
             self.step_changed.emit(0, len(self._events), None)
-            self.stats_updated.emit(0, 0, 0, 0, self._elapsed_ms)
+            self.stats_updated.emit(0, 0, 0, 0, 0, self._elapsed_ms)
             self._set_state(RunState.IDLE)
             return True
         return False
 
     def _on_tick(self):
+        if self._state == RunState.FINISHED:
+            self._timer.stop()
+            return
         self._update_elapsed()
         if self._current_index < len(self._events) - 1:
             self._current_index += 1
@@ -144,9 +153,9 @@ class NQueensPlaybackController(QObject):
 
     def _emit_current_step(self):
         ev = self._events[self._current_index]
-        att, cnf, sols, depth = self._cumulative_stats[self._current_index]
+        att, cnf, bck, sols, depth = self._cumulative_stats[self._current_index]
         self.step_changed.emit(self._current_index + 1, len(self._events), ev)
-        self.stats_updated.emit(att, cnf, sols, depth, self._elapsed_ms)
+        self.stats_updated.emit(att, cnf, bck, sols, depth, self._elapsed_ms)
 
         if ev.event_type == NQueensEventType.SOLUTION_FOUND and ev.solution_index is not None:
             self.solution_discovered.emit(ev.solution_index, list(ev.queens))
@@ -159,12 +168,30 @@ class NQueensPlaybackController(QObject):
             self._last_tick_time = now
 
     def _handle_completion(self):
-        self._timer.stop()
-        self._set_state(RunState.FINISHED)
-        if not self._events:
+        if self._state == RunState.FINISHED:
             return
 
-        att, cnf, sols, depth = self._cumulative_stats[-1] if self._cumulative_stats else (0, 0, 0, 0)
+        self._timer.stop()
+        self._update_elapsed()
+        self._set_state(RunState.FINISHED)
+
+        if self._cumulative_stats:
+            att, cnf, bck, sols, depth = self._cumulative_stats[-1]
+            last_ev = self._events[-1] if self._events else None
+        else:
+            att, cnf, bck, sols, depth = (0, 0, 0, 0, 0)
+            last_ev = None
+
+        if self._events:
+            self._current_index = len(self._events) - 1
+            step_num = len(self._events)
+        else:
+            self._current_index = -1
+            step_num = 0
+
+        self.step_changed.emit(step_num, len(self._events), last_ev)
+        self.stats_updated.emit(att, cnf, bck, sols, depth, self._elapsed_ms)
+
         msg = f"Search complete! Found {sols} solution(s) with {att} attempts and {cnf} conflicts."
         self.finished.emit(sols, att, cnf, msg)
 

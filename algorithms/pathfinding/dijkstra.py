@@ -122,6 +122,7 @@ class DijkstraPathfinder(BasePathfinder):
         path.append(start)
         path.reverse()
 
+        steps = len(path) - 1 if len(path) > 1 else 0
         total_cost = dist[target]
 
         events.append(PathEvent(
@@ -130,7 +131,7 @@ class DijkstraPathfinder(BasePathfinder):
             visited_nodes=set(visited),
             path=list(path),
             cost_so_far=total_cost,
-            description=f"Optimal path found by Dijkstra! Steps: {len(path)}, Total Cost: {total_cost}"
+            description=f"Optimal path found by Dijkstra! Length: {steps} steps ({len(path)} nodes), Total Cost: {total_cost}"
         ))
 
         return events, path, total_cost

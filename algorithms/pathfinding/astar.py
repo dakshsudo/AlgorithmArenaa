@@ -129,6 +129,7 @@ class AStarPathfinder(BasePathfinder):
         path.append(start)
         path.reverse()
 
+        steps = len(path) - 1 if len(path) > 1 else 0
         total_cost = g_score[target]
 
         events.append(PathEvent(
@@ -137,7 +138,7 @@ class AStarPathfinder(BasePathfinder):
             visited_nodes=set(visited),
             path=list(path),
             cost_so_far=total_cost,
-            description=f"Optimal path found by A*! Steps: {len(path)}, Total Cost: {total_cost}"
+            description=f"Optimal path found by A*! Length: {steps} steps ({len(path)} nodes), Total Cost: {total_cost}"
         ))
 
         return events, path, total_cost

@@ -60,10 +60,12 @@ class ChessboardCanvas(QWidget):
         # Board square size
         margin = 28
         board_size = min(w, h) - 2 * margin
-        if board_size <= 0:
+        if board_size <= 0 or n <= 0:
             return
 
         tile_size = board_size / n
+        if tile_size <= 0:
+            return
         start_x = (w - board_size) / 2
         start_y = (h - board_size) / 2
 
@@ -120,7 +122,8 @@ class ChessboardCanvas(QWidget):
             painter.drawLine(p1, p2)
 
         # Draw Queens
-        font_queen = QFont("Segoe UI Symbol", int(tile_size * 0.55), QFont.Weight.Bold)
+        queen_font_size = max(1, int(tile_size * 0.55))
+        font_queen = QFont("Segoe UI Symbol", queen_font_size, QFont.Weight.Bold)
         painter.setFont(font_queen)
 
         for r in range(min(n, len(self.queens))):

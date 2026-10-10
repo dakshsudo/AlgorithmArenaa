@@ -179,15 +179,21 @@ class GridCanvas(QWidget):
         rows = self.grid.rows
         cols = self.grid.cols
 
+        if w <= 0 or h <= 0 or rows <= 0 or cols <= 0:
+            return
+
         cell_w = w / cols
         cell_h = h / rows
+        if cell_w <= 0 or cell_h <= 0:
+            return
 
         # Background
         painter.fillRect(0, 0, w, h, self._c_bg)
 
         # Draw Cells
         path_set = set(self._path_nodes)
-        font_badge = QFont("Segoe UI", int(min(cell_w, cell_h) * 0.45), QFont.Weight.Bold)
+        badge_size = max(1, int(min(cell_w, cell_h) * 0.45))
+        font_badge = QFont("Segoe UI", badge_size, QFont.Weight.Bold)
 
         for r in range(rows):
             for c in range(cols):

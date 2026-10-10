@@ -13,7 +13,7 @@ DATA_DIR = BASE_DIR / "data"
 # Default window settings
 DEFAULT_WINDOW_WIDTH = 1280
 DEFAULT_WINDOW_HEIGHT = 800
-MIN_WINDOW_WIDTH = 1000
+MIN_WINDOW_WIDTH = 1100
 MIN_WINDOW_HEIGHT = 650
 
 # Ensure data directory exists

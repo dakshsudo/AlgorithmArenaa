@@ -141,9 +141,9 @@ class PathfindingPlaybackController(QObject):
 
         last_ev = self._events[-1]
         if last_ev.event_type == PathEventType.FOUND_PATH:
-            path_len = len(last_ev.path)
+            path_steps = max(0, len(last_ev.path) - 1) if last_ev.path else 0
             path_cost = int(last_ev.cost_so_far)
-            self.finished.emit(True, path_len, path_cost, f"Target Reached! Path Length: {path_len}, Cost: {path_cost}")
+            self.finished.emit(True, path_steps, path_cost, f"Target Reached! Path Length: {path_steps} steps, Cost: {path_cost}")
         else:
             self.finished.emit(False, 0, 0, "No path possible: Target is completely walled off.")
 

@@ -108,7 +108,8 @@ class DFSPathfinder(BasePathfinder):
         path.append(start)
         path.reverse()
 
-        cost = len(path) - 1
+        cost = sum(grid.get_cost(*node) for node in path[1:]) if len(path) > 1 else 0
+        steps = len(path) - 1 if len(path) > 1 else 0
 
         events.append(PathEvent(
             event_type=PathEventType.FOUND_PATH,
@@ -116,7 +117,7 @@ class DFSPathfinder(BasePathfinder):
             visited_nodes=set(visited),
             path=list(path),
             cost_so_far=cost,
-            description=f"Path found! (Note: DFS path is not guaranteed optimal). Steps: {len(path)}, Cost: {cost}"
+            description=f"Path found! (DFS path is not guaranteed optimal). Length: {steps} steps ({len(path)} nodes), Cost: {cost}"
         ))
 
         return events, path, cost

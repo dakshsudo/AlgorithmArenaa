@@ -70,9 +70,9 @@ QLabel {{
 QToolTip {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
     color: {Colors.TEXT_PRIMARY};
-    border: 1px solid {Colors.BORDER_DEFAULT};
+    border: 1px solid {Colors.PRIMARY};
     padding: 6px 10px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 12px;
 }}
 
@@ -158,56 +158,91 @@ QLabel.section-title, QLabel[class="section-title"] {{
 }}
 
 /* Buttons */
-QPushButton.primary-btn, QPushButton[class="primary-btn"] {{
-    background-color: {Colors.PRIMARY};
-    color: {Colors.TEXT_INVERTED};
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-weight: 600;
-    font-size: 12px;
-}}
-
-QPushButton.primary-btn:hover, QPushButton[class="primary-btn"]:hover {{
-    background-color: {Colors.PRIMARY_LIGHT};
-}}
-
-QPushButton.primary-btn:pressed, QPushButton[class="primary-btn"]:pressed {{
-    background-color: {Colors.PRIMARY_DARK};
-}}
-
-QPushButton.primary-btn:disabled, QPushButton[class="primary-btn"]:disabled {{
-    background-color: {Colors.BG_SURFACE_ELEVATED};
-    color: {Colors.TEXT_MUTED};
-}}
-
-QPushButton.secondary-btn, QPushButton[class="secondary-btn"] {{
+QPushButton {{
     background-color: {Colors.BG_SURFACE_ELEVATED};
     color: {Colors.TEXT_PRIMARY};
     border: 1px solid {Colors.BORDER_DEFAULT};
     border-radius: 6px;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-weight: 500;
     font-size: 12px;
 }}
 
-QPushButton.secondary-btn:hover, QPushButton[class="secondary-btn"]:hover {{
+QPushButton:hover {{
     background-color: {Colors.BG_SURFACE_HOVER};
     border-color: {Colors.BORDER_FOCUS};
 }}
 
-QPushButton.secondary-btn:pressed, QPushButton[class="secondary-btn"]:pressed {{
+QPushButton:pressed {{
     background-color: {Colors.BG_SURFACE};
 }}
 
-QPushButton.secondary-btn:disabled, QPushButton[class="secondary-btn"]:disabled {{
+QPushButton:disabled {{
+    background-color: rgba(31, 41, 55, 0.4);
     color: {Colors.TEXT_MUTED};
-    border-color: {Colors.BORDER_DEFAULT};
+    border-color: rgba(31, 41, 61, 0.4);
+}}
+
+QPushButton[class="primary-btn"] {{
+    background-color: {Colors.PRIMARY};
+    color: {Colors.TEXT_INVERTED};
+    border: 1px solid {Colors.PRIMARY};
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 12px;
+}}
+
+QPushButton[class="primary-btn"]:hover {{
+    background-color: {Colors.PRIMARY_LIGHT};
+    border-color: {Colors.PRIMARY_LIGHT};
+}}
+
+QPushButton[class="primary-btn"]:pressed {{
+    background-color: {Colors.PRIMARY_DARK};
+}}
+
+QPushButton[class="primary-btn"]:disabled {{
+    background-color: rgba(56, 189, 248, 0.15);
+    color: {Colors.TEXT_MUTED};
+    border-color: rgba(56, 189, 248, 0.25);
+}}
+
+QPushButton[class="secondary-btn"] {{
+    background-color: {Colors.BG_SURFACE_ELEVATED};
+    color: {Colors.TEXT_PRIMARY};
+    border: 1px solid {Colors.BORDER_DEFAULT};
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-weight: 500;
+    font-size: 12px;
+}}
+
+QPushButton[class="secondary-btn"]:hover {{
+    background-color: {Colors.BG_SURFACE_HOVER};
+    border-color: {Colors.BORDER_FOCUS};
+}}
+
+QPushButton[class="secondary-btn"]:pressed {{
+    background-color: {Colors.BG_SURFACE};
+}}
+
+QPushButton[class="secondary-btn"]:checked {{
+    background-color: {Colors.PRIMARY_DARK};
+    color: #ffffff;
+    border-color: {Colors.PRIMARY};
+    font-weight: 600;
+}}
+
+QPushButton[class="secondary-btn"]:disabled {{
+    background-color: rgba(31, 41, 55, 0.4);
+    color: {Colors.TEXT_MUTED};
+    border-color: rgba(31, 41, 61, 0.4);
 }}
 
 /* Inputs */
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {{
-    background-color: {Colors.BG_BASE};
+    background-color: {Colors.BG_SURFACE_ELEVATED};
     color: {Colors.TEXT_PRIMARY};
     border: 1px solid {Colors.BORDER_DEFAULT};
     border-radius: 6px;
@@ -218,6 +253,17 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {{
 
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {{
     border-color: {Colors.BORDER_FOCUS};
+    background-color: {Colors.BG_SURFACE_HOVER};
+}}
+
+QComboBox {{
+    padding-right: 28px;
+    min-height: 20px;
+}}
+
+QComboBox:hover {{
+    border-color: {Colors.BORDER_FOCUS};
+    background-color: {Colors.BG_SURFACE_HOVER};
 }}
 
 QComboBox::drop-down {{
@@ -225,6 +271,15 @@ QComboBox::drop-down {{
     subcontrol-position: top right;
     width: 24px;
     border-left-width: 0px;
+}}
+
+QComboBox::down-arrow {{
+    width: 0px;
+    height: 0px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid {Colors.TEXT_SECONDARY};
+    margin-right: 8px;
 }}
 
 QComboBox QAbstractItemView {{

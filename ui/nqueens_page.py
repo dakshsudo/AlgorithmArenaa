@@ -46,6 +46,7 @@ class NQueensPage(QWidget):
 
         # Left Column: Controls + Canvas
         left_container = QWidget()
+        left_container.setMinimumWidth(580)
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(0, 0, 12, 0)
         left_layout.setSpacing(12)
@@ -68,6 +69,8 @@ class NQueensPage(QWidget):
         right_container = self._create_sidebar_info()
         main_splitter.addWidget(right_container)
 
+        main_splitter.setCollapsible(0, False)
+        main_splitter.setCollapsible(1, False)
         main_splitter.setStretchFactor(0, 3)
         main_splitter.setStretchFactor(1, 2)
         main_splitter.setSizes([680, 340])
@@ -110,8 +113,9 @@ class NQueensPage(QWidget):
         row1.addWidget(mode_lbl)
 
         self.mode_combo = QComboBox()
-        self.mode_combo.addItem("Find One Solution", True)
         self.mode_combo.addItem("Enumerate All Solutions", False)
+        self.mode_combo.addItem("Find One Solution", True)
+        self.mode_combo.setCurrentIndex(0 if not self.find_one_mode else 1)
         self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
         row1.addWidget(self.mode_combo)
 
@@ -255,9 +259,10 @@ class NQueensPage(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
-        scroll.setMinimumWidth(300)
+        scroll.setMinimumWidth(320)
 
         container = QWidget()
+        container.setMinimumWidth(300)
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 8, 0)
         layout.setSpacing(12)
@@ -277,6 +282,7 @@ class NQueensPage(QWidget):
         s_layout.setSpacing(10)
 
         s_header = QLabel("Search & Backtracking Metrics")
+        s_header.setWordWrap(True)
         s_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         s_layout.addWidget(s_header)
 
@@ -286,14 +292,15 @@ class NQueensPage(QWidget):
         self.stat_depth = self._add_stat_box(grid, 0, 1, "Current Depth", "0")
         self.stat_attempts = self._add_stat_box(grid, 1, 0, "Placements Tested", "0")
         self.stat_conflicts = self._add_stat_box(grid, 1, 1, "Conflicts Pruned", "0")
-        self.stat_step = self._add_stat_box(grid, 2, 0, "Step Index", "0 / 0")
+        self.stat_backtracks = self._add_stat_box(grid, 2, 0, "Backtracks", "0")
         self.stat_time = self._add_stat_box(grid, 2, 1, "Elapsed Time", "0.0 s")
+        self.stat_step = self._add_stat_box(grid, 3, 0, "Step Index", "0 / 0", colspan=2)
         s_layout.addLayout(grid)
 
         self.status_badge = QLabel("Status: Ready to Search")
         self.status_badge.setWordWrap(True)
         self.status_badge.setStyleSheet(f"""
-            background-color: {Colors.BG_BASE};
+            background-color: {Colors.BG_SURFACE_ELEVATED};
             color: {Colors.TEXT_SECONDARY};
             border: 1px solid {Colors.BORDER_DEFAULT};
             border-radius: 6px;
@@ -319,6 +326,7 @@ class NQueensPage(QWidget):
         c_layout.setSpacing(8)
 
         c_header = QLabel("Theoretical Properties")
+        c_header.setWordWrap(True)
         c_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         c_layout.addWidget(c_header)
 
@@ -348,6 +356,7 @@ class NQueensPage(QWidget):
         p_layout.setSpacing(8)
 
         p_header = QLabel("Backtracking Logic & Pruning")
+        p_header.setWordWrap(True)
         p_header.setStyleSheet(f"font-size: 14px; font-weight: 700; color: {Colors.TEXT_PRIMARY}; background: transparent; border: none;")
         p_layout.addWidget(p_header)
 
@@ -397,7 +406,7 @@ class NQueensPage(QWidget):
         frame.setObjectName(frame_id)
         frame.setStyleSheet(f"""
             QFrame#{frame_id} {{
-                background-color: {Colors.BG_BASE};
+                background-color: {Colors.BG_SURFACE_ELEVATED};
                 border: 1px solid {Colors.BORDER_DEFAULT};
                 border-radius: 6px;
             }}
@@ -452,14 +461,19 @@ class NQueensPage(QWidget):
         self.controller.load_events(events)
         self.canvas.set_state([-1] * self.current_n)
 
+        self.step_back_btn.setEnabled(False)
+        self.step_fwd_btn.setEnabled(len(events) > 0)
+        self.play_btn.setEnabled(len(events) > 0)
+
         self.stat_solutions.setText("0")
         self.stat_attempts.setText("0")
         self.stat_conflicts.setText("0")
+        self.stat_backtracks.setText("0")
         self.stat_depth.setText("0")
         self.stat_step.setText(f"0 / {len(events)}")
         self.stat_time.setText("0.0 s")
         self.status_badge.setText("Status: Ready to Search")
-        self.status_badge.setStyleSheet(f"background-color: {Colors.BG_BASE}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
+        self.status_badge.setStyleSheet(f"background-color: {Colors.BG_SURFACE_ELEVATED}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
 
     def _on_play_pause_clicked(self):
         if self.controller.state == RunState.RUNNING:
@@ -472,9 +486,13 @@ class NQueensPage(QWidget):
     def _on_reset_clicked(self):
         self.controller.reset()
         self.canvas.set_state([-1] * self.current_n)
+        self.step_back_btn.setEnabled(False)
+        self.step_fwd_btn.setEnabled(self.controller.total_steps > 0)
 
     def _on_step_changed(self, curr_step: int, total_steps: int, event: Optional[NQueensEvent]):
         self.stat_step.setText(f"{curr_step} / {total_steps}")
+        self.step_back_btn.setEnabled(curr_step > 0)
+        self.step_fwd_btn.setEnabled(curr_step < total_steps)
         if event is None:
             self.canvas.set_state([-1] * self.current_n)
             return
@@ -499,14 +517,16 @@ class NQueensPage(QWidget):
             self.status_badge.setStyleSheet(f"background-color: rgba(129, 140, 248, 0.15); color: {Colors.SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.SECONDARY};")
         elif state_str == RunState.FINISHED.value:
             self.play_btn.setText("↺ Restart")
+            self.step_fwd_btn.setEnabled(False)
         else:
             self.play_btn.setText("▶ Start Search")
             self.status_badge.setText("Status: Ready to Search")
-            self.status_badge.setStyleSheet(f"background-color: {Colors.BG_BASE}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
+            self.status_badge.setStyleSheet(f"background-color: {Colors.BG_SURFACE_ELEVATED}; color: {Colors.TEXT_SECONDARY}; border-radius: 6px; padding: 8px; border: 1px solid {Colors.BORDER_DEFAULT};")
 
-    def _on_stats_updated(self, attempts: int, conflicts: int, solutions: int, depth: int, elapsed_ms: int):
+    def _on_stats_updated(self, attempts: int, conflicts: int, backtracks: int, solutions: int, depth: int, elapsed_ms: int):
         self.stat_attempts.setText(str(attempts))
         self.stat_conflicts.setText(str(conflicts))
+        self.stat_backtracks.setText(str(backtracks))
         self.stat_solutions.setText(str(solutions))
         self.stat_depth.setText(f"{depth} / {self.current_n}")
         self.stat_time.setText(f"{elapsed_ms / 1000.0:.1f} s")
